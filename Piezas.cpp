@@ -1,5 +1,7 @@
 #include "Piezas.h"
 #include <vector>
+#include <iostream>
+using namespace std;
 /** CLASS Piezas
  * Class for representing a Piezas vertical board, which is roughly based
  * on the game "Connect Four" where pieces are placed in a column and 
@@ -21,7 +23,16 @@
  * specifies it is X's turn first
 **/
 Piezas::Piezas()
-{
+{   
+    board.resize(BOARD_ROWS);
+    for(int i = 0; i<3; i++) {
+        board[i].resize(BOARD_COLS);
+        for( int j = 0; j<4; j++) {
+            board[i][j] = Blank;
+        }
+    }
+    turn = X;
+    // board[0][0] = Blank;
 }
 
 /**
@@ -30,6 +41,12 @@ Piezas::Piezas()
 **/
 void Piezas::reset()
 {
+    for(int i = 0; i<BOARD_ROWS; i++) {
+        for( int j = 0; j<BOARD_COLS; j++) {
+            board[i][j] = Blank;
+        }
+    }
+    
 }
 
 /**
@@ -42,6 +59,24 @@ void Piezas::reset()
 **/ 
 Piece Piezas::dropPiece(int column)
 {
+    //toggle turn
+    if(turn == X) {
+        turn = O;    
+    } else {
+        turn = X;
+    }
+    //out of bounds
+    if(column >= BOARD_COLS) {
+        return Invalid;
+    }
+    //places piece and checks if col is full 
+    for(int i = 0; i < BOARD_ROWS; i++ ) {
+        if(board[i][column] == Blank) {
+           board[i][column] = turn;
+           return turn;
+        }
+    }
+    //board is full
     return Blank;
 }
 
@@ -51,7 +86,12 @@ Piece Piezas::dropPiece(int column)
 **/
 Piece Piezas::pieceAt(int row, int column)
 {
-    return Blank;
+    //checks bounds
+    if((column >= BOARD_COLS) || (row >= BOARD_ROWS)) {
+        return Invalid;
+    }
+    //return piece
+    return board[row][column];
 }
 
 /**
@@ -65,5 +105,34 @@ Piece Piezas::pieceAt(int row, int column)
 **/
 Piece Piezas::gameState()
 {
+    int xstreak = 0;
+    int ostreak = 0;
+    //check for completion
+    for(int i = 0; i<BOARD_ROWS; i++) {
+        for( int j = 0; j<BOARD_COLS; j++) {
+            if(board[i][j] == Blank) {
+                return Invalid;
+            }
+        }
+    }
+    
+    //four streak
+    for(int i = 0; i < BOARD_ROWS; i++) {
+        if((pieceAt(i,0) == (pieceAt(i,1))) && (pieceAt(i,2) == pieceAt(i,3))) {
+           if(pieceAt(i,0) == pieceAt(i,3) && pieceAt(i,1) == X) {
+              ostreak = 4; 
+           } else if((pieceAt(i,0) == pieceAt(i,3)) && pieceAt(i,1) == O) {
+              xstreak = 4; 
+           } 
+        }
+    } 
+     
+    if(xstreak == ostreak) {
+        return Blank;
+    } else if (xstreak > ostreak) {
+        return X;
+    } else {
+        return O;
+    }
     return Blank;
 }
